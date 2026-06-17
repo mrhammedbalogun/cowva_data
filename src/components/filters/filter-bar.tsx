@@ -13,17 +13,10 @@ import {
 } from "@/components/ui/select";
 import { MultiSelect } from "./multi-select";
 import { useFilters } from "./filter-context";
-import { STATES, FACILITIES, VACCINES, DATA_START, DATA_END } from "@/lib/reference";
-import type { Gender, Granularity } from "@/lib/types";
+import { DATA_START, DATA_END } from "@/lib/reference";
+import { getFilterOptions } from "@/lib/api";
+import type { FilterOptions, Gender, Granularity } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const STATE_OPTIONS = STATES.map((s) => s.name);
-const VACCINE_OPTIONS = VACCINES.map((v) => v.name);
-
-function branchNames(facility: string, count: number): string[] {
-  const suffixes = ["Main", "Annex", "Unit 3"];
-  return Array.from({ length: count }, (_, i) => `${facility} — ${suffixes[i]}`);
-}
 
 function shiftDays(iso: string, days: number): string {
   const d = new Date(iso);
@@ -73,24 +66,22 @@ export function FilterBar() {
   } = useFilters();
 
   const [datePreset, setDatePreset] = React.useState("all");
+  const [options, setOptions] = React.useState<FilterOptions>({
+    states: [],
+    facilities: [],
+    branches: [],
+    vaccines: [],
+  });
 
-  const facilityOptions = React.useMemo(() => {
-    const scope = filters.states.length
-      ? FACILITIES.filter((f) => filters.states.includes(f.state))
-      : FACILITIES;
-    return scope.map((f) => f.name);
-  }, [filters.states]);
-
-  const branchOptions = React.useMemo(() => {
-    const scope = FACILITIES.filter((f) => {
-      const inState =
-        !filters.states.length || filters.states.includes(f.state);
-      const inFacility =
-        !filters.facilities.length || filters.facilities.includes(f.name);
-      return inState && inFacility;
-    });
-    return scope.flatMap((f) => branchNames(f.name, f.branches));
-  }, [filters.states, filters.facilities]);
+  React.useEffect(() => {
+    let active = true;
+    getFilterOptions()
+      .then((o) => active && setOptions(o))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function applyPreset(preset: string | null) {
     if (!preset) return;
@@ -114,25 +105,25 @@ export function FilterBar() {
       <div className="flex flex-wrap items-center gap-2">
         <MultiSelect
           label="State"
-          options={STATE_OPTIONS}
+          options={options.states}
           selected={filters.states}
           onChange={setStates}
         />
         <MultiSelect
           label="Facility"
-          options={facilityOptions}
+          options={options.facilities}
           selected={filters.facilities}
           onChange={setFacilities}
         />
         <MultiSelect
           label="Branch"
-          options={branchOptions}
+          options={options.branches}
           selected={filters.branches}
           onChange={setBranches}
         />
         <MultiSelect
           label="Vaccine"
-          options={VACCINE_OPTIONS}
+          options={options.vaccines}
           selected={filters.vaccines}
           onChange={setVaccines}
         />

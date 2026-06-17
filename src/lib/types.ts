@@ -61,6 +61,13 @@ export interface FacilityRow {
   lastActivity: string;
 }
 
+export interface FilterOptions {
+  states: string[];
+  facilities: string[];
+  branches: string[];
+  vaccines: string[];
+}
+
 export interface OverviewData {
   kpis: Kpi[];
   timeSeries: TimePoint[];

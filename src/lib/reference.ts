@@ -97,3 +97,17 @@ function buildFacilities(): FacilityRef[] {
 }
 
 export const FACILITIES: FacilityRef[] = buildFacilities();
+
+const BRANCH_SUFFIXES = ["Main", "Annex", "Unit 3"];
+
+export function mockFilterOptions() {
+  const branches = FACILITIES.flatMap((f) =>
+    Array.from({ length: f.branches }, (_, i) => `${f.name} — ${BRANCH_SUFFIXES[i]}`)
+  );
+  return {
+    states: STATES.map((s) => s.name),
+    facilities: FACILITIES.map((f) => f.name),
+    branches,
+    vaccines: VACCINES.map((v) => v.name),
+  };
+}
