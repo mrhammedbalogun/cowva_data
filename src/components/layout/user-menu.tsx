@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,23 +13,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { USER_COOKIE, decodeUser, type AdminUser } from "@/lib/auth";
 
-type UserMenuProps = {
-  name?: string;
-  email?: string;
-};
+function readUserCookie(): AdminUser | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${USER_COOKIE}=`));
+  return decodeUser(match?.split("=")[1]);
+}
 
-export function UserMenu({
-  name = "Cowva Admin",
-  email = "admin@cowva.com",
-}: UserMenuProps) {
+export function UserMenu() {
   const router = useRouter();
+  const [user, setUser] = React.useState<AdminUser | null>(null);
+
+  React.useEffect(() => {
+    setUser(readUserCookie());
+  }, []);
+
+  const name = user?.name ?? "Cowva Admin";
+  const email = user?.email ?? "admin@cowva.com";
   const initials = name
     .split(" ")
     .map((p) => p[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  async function signOut() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <DropdownMenu>
@@ -52,7 +68,7 @@ export function UserMenu({
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/login")}>
+        <DropdownMenuItem onClick={signOut}>
           <LogOut className="size-4" />
           Sign out
         </DropdownMenuItem>
