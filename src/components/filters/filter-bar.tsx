@@ -101,7 +101,7 @@ export function FilterBar() {
   }
 
   return (
-    <div className="rounded-lg border bg-muted/30 p-3">
+    <div className="rounded-lg border bg-muted/30 p-3 print:hidden">
       <div className="flex flex-wrap items-center gap-2">
         <MultiSelect
           label="State"

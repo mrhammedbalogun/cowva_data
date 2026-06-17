@@ -12,7 +12,7 @@ export default function DashboardLayout({
   return (
     <FilterProvider>
       <div className="flex min-h-screen w-full">
-        <aside className="hidden w-64 shrink-0 flex-col border-r bg-sidebar lg:flex">
+        <aside className="hidden w-64 shrink-0 flex-col border-r bg-sidebar lg:flex print:hidden">
           <div className="flex h-14 items-center border-b px-4">
             <Brand subtitle="Vaccination impact" />
           </div>
@@ -26,7 +26,7 @@ export default function DashboardLayout({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <main className="flex-1 space-y-4 p-4 sm:p-6">
+          <main className="flex-1 space-y-4 p-4 sm:p-6 print:p-0">
             <FilterBar />
             {children}
           </main>
