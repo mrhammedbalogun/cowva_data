@@ -89,6 +89,25 @@ export interface DemographicsData {
   pregnancy: { pregnant: number; nonPregnant: number };
 }
 
+export interface BrandCount {
+  brand: string;
+  value: number;
+}
+
+export interface BranchCount {
+  branch: string;
+  value: number;
+  completionRate: number;
+}
+
+export interface VaccineBrandsData {
+  brands: BrandCount[];
+}
+
+export interface FacilityBranchesData {
+  branches: BranchCount[];
+}
+
 export interface OverviewData {
   kpis: Kpi[];
   timeSeries: TimePoint[];

@@ -278,6 +278,32 @@ export function buildFacilitiesList(f: Filters) {
   return { facilities };
 }
 
+export function buildVaccineBrands(vaccine: string, f: Filters) {
+  const base = Math.round(scaledTotal(f) * 0.18);
+  const stem = vaccine.split(" ")[0];
+  const splits = [0.46, 0.3, 0.16, 0.08];
+  return {
+    brands: ["Brand A", "Brand B", "Brand C", "Brand D"].map((b, i) => ({
+      brand: `${stem} ${b}`,
+      value: Math.max(1, Math.round(base * splits[i])),
+    })),
+  };
+}
+
+export function buildFacilityBranches(facility: string, f: Filters) {
+  const fac = FACILITIES.find((x) => x.name === facility);
+  const n = fac?.branches ?? 2;
+  const base = Math.round(scaledTotal(f) * 0.04);
+  const suffixes = ["Main", "Annex", "Unit 3"];
+  return {
+    branches: Array.from({ length: n }, (_, i) => ({
+      branch: `${facility} — ${suffixes[i]}`,
+      value: Math.max(1, Math.round(base / (i + 1))),
+      completionRate: 72 + i * 4,
+    })),
+  };
+}
+
 const AGE_PROPS: [string, number][] = [
   ["<1", 112],
   ["1-4", 998],

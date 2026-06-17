@@ -11,6 +11,8 @@ import {
   buildVaccines,
   buildFacilitiesList,
   buildDemographics,
+  buildVaccineBrands,
+  buildFacilityBranches,
 } from "./mock-data";
 import { mockFilterOptions } from "./reference";
 import type {
@@ -21,6 +23,8 @@ import type {
   VaccinesData,
   FacilitiesData,
   DemographicsData,
+  VaccineBrandsData,
+  FacilityBranchesData,
 } from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
@@ -91,6 +95,34 @@ export async function getDemographics(filters: Filters): Promise<DemographicsDat
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Failed to load demographics (${res.status})`);
+  return res.json();
+}
+
+export async function getVaccineBrands(
+  vaccine: string,
+  filters: Filters
+): Promise<VaccineBrandsData> {
+  if (USE_MOCK) return delay(buildVaccineBrands(vaccine, filters));
+  const qs = new URLSearchParams(toQuery(filters));
+  qs.set("vaccine", vaccine);
+  const res = await fetch(`/api/analytics/vaccine-brands?${qs.toString()}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load brands (${res.status})`);
+  return res.json();
+}
+
+export async function getFacilityBranches(
+  facility: string,
+  filters: Filters
+): Promise<FacilityBranchesData> {
+  if (USE_MOCK) return delay(buildFacilityBranches(facility, filters));
+  const qs = new URLSearchParams(toQuery(filters));
+  qs.set("facility", facility);
+  const res = await fetch(`/api/analytics/facility-branches?${qs.toString()}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load branches (${res.status})`);
   return res.json();
 }
 

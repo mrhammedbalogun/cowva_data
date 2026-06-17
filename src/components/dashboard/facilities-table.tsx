@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/table";
 import type { FacilityRow } from "@/lib/types";
 
-export function FacilitiesTable({ rows }: { rows: FacilityRow[] }) {
+export function FacilitiesTable({
+  rows,
+  onRowClick,
+}: {
+  rows: FacilityRow[];
+  onRowClick?: (facility: string) => void;
+}) {
   if (!rows.length) {
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
@@ -30,7 +36,11 @@ export function FacilitiesTable({ rows }: { rows: FacilityRow[] }) {
       </TableHeader>
       <TableBody>
         {rows.map((r) => (
-          <TableRow key={r.facility}>
+          <TableRow
+            key={r.facility}
+            className={onRowClick ? "cursor-pointer" : undefined}
+            onClick={onRowClick ? () => onRowClick(r.facility) : undefined}
+          >
             <TableCell className="font-medium">{r.facility}</TableCell>
             <TableCell className="text-muted-foreground">{r.state}</TableCell>
             <TableCell className="text-right">{r.branches}</TableCell>

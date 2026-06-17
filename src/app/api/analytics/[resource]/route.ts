@@ -10,6 +10,8 @@ const ALLOWED = new Set([
   "vaccines",
   "facilities",
   "demographics",
+  "vaccine-brands",
+  "facility-branches",
 ]);
 
 export async function GET(

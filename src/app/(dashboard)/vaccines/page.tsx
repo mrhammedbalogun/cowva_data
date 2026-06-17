@@ -10,8 +10,11 @@ import {
 } from "recharts";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DonutChart } from "@/components/dashboard/donut-chart";
+import * as React from "react";
 import { useAnalytics } from "@/components/dashboard/use-analytics";
-import { getVaccines } from "@/lib/api";
+import { useFilters } from "@/components/filters/filter-context";
+import { DrillSheet } from "@/components/dashboard/drill-sheet";
+import { getVaccines, getVaccineBrands } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -29,7 +32,22 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export default function VaccinesPage() {
   const { data, loading, error } = useAnalytics(getVaccines);
+  const { filters } = useFilters();
   const top = (data?.byVaccine ?? []).slice(0, 10);
+
+  const [drill, setDrill] = React.useState<{
+    open: boolean;
+    vaccine: string;
+    loading: boolean;
+    brands: { brand: string; value: number }[];
+  }>({ open: false, vaccine: "", loading: false, brands: [] });
+
+  function openBrands(vaccine: string) {
+    setDrill({ open: true, vaccine, loading: true, brands: [] });
+    getVaccineBrands(vaccine, filters)
+      .then((d) => setDrill((s) => ({ ...s, loading: false, brands: d.brands })))
+      .catch(() => setDrill((s) => ({ ...s, loading: false, brands: [] })));
+  }
 
   return (
     <div className="space-y-4">
@@ -95,7 +113,7 @@ export default function VaccinesPage() {
         </ChartCard>
       </div>
 
-      <ChartCard title="All vaccines">
+      <ChartCard title="All vaccines — click a row for brand breakdown">
         {loading || !data ? (
           <Skeleton className="h-48 w-full" />
         ) : (
@@ -109,7 +127,11 @@ export default function VaccinesPage() {
             </TableHeader>
             <TableBody>
               {data.byVaccine.map((v) => (
-                <TableRow key={v.vaccine}>
+                <TableRow
+                  key={v.vaccine}
+                  className="cursor-pointer"
+                  onClick={() => openBrands(v.vaccine)}
+                >
                   <TableCell className="font-medium">{v.vaccine}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {CATEGORY_LABEL[v.category] ?? v.category}
@@ -123,6 +145,16 @@ export default function VaccinesPage() {
           </Table>
         )}
       </ChartCard>
+
+      <DrillSheet
+        open={drill.open}
+        onOpenChange={(open) => setDrill((s) => ({ ...s, open }))}
+        title={drill.vaccine}
+        subtitle="Doses administered by brand"
+        unit="brands"
+        loading={drill.loading}
+        items={drill.brands.map((b) => ({ label: b.brand, value: b.value }))}
+      />
     </div>
   );
 }
