@@ -68,6 +68,27 @@ export interface FilterOptions {
   vaccines: string[];
 }
 
+export interface VaccinationsData {
+  timeSeries: TimePoint[];
+  completionSeries: TimePoint[];
+  totals: { total: number; complete: number; incomplete: number };
+}
+
+export interface VaccinesData {
+  byVaccine: VaccineCount[];
+  byVaccineCategory: CategorySplit;
+}
+
+export interface FacilitiesData {
+  facilities: FacilityRow[];
+}
+
+export interface DemographicsData {
+  genderSplit: GenderSplit;
+  ageBands: AgeBand[];
+  pregnancy: { pregnant: number; nonPregnant: number };
+}
+
 export interface OverviewData {
   kpis: Kpi[];
   timeSeries: TimePoint[];

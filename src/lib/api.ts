@@ -5,9 +5,23 @@
 // same-origin Next route handlers that proxy to the Django analytics API with
 // the httpOnly session token — the browser never sees the token or hits CORS.
 
-import { buildOverview } from "./mock-data";
+import {
+  buildOverview,
+  buildVaccinations,
+  buildVaccines,
+  buildFacilitiesList,
+  buildDemographics,
+} from "./mock-data";
 import { mockFilterOptions } from "./reference";
-import type { Filters, OverviewData, FilterOptions } from "./types";
+import type {
+  Filters,
+  OverviewData,
+  FilterOptions,
+  VaccinationsData,
+  VaccinesData,
+  FacilitiesData,
+  DemographicsData,
+} from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
@@ -43,6 +57,42 @@ type RawFilterOptions = {
   branches?: string[];
   vaccines?: ({ name: string } | string)[];
 };
+
+export async function getVaccinations(filters: Filters): Promise<VaccinationsData> {
+  if (USE_MOCK) return delay(buildVaccinations(filters));
+  const res = await fetch(`/api/analytics/vaccinations?${toQuery(filters)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load vaccinations (${res.status})`);
+  return res.json();
+}
+
+export async function getVaccines(filters: Filters): Promise<VaccinesData> {
+  if (USE_MOCK) return delay(buildVaccines(filters));
+  const res = await fetch(`/api/analytics/vaccines?${toQuery(filters)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load vaccines (${res.status})`);
+  return res.json();
+}
+
+export async function getFacilities(filters: Filters): Promise<FacilitiesData> {
+  if (USE_MOCK) return delay(buildFacilitiesList(filters));
+  const res = await fetch(`/api/analytics/facilities?${toQuery(filters)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load facilities (${res.status})`);
+  return res.json();
+}
+
+export async function getDemographics(filters: Filters): Promise<DemographicsData> {
+  if (USE_MOCK) return delay(buildDemographics(filters));
+  const res = await fetch(`/api/analytics/demographics?${toQuery(filters)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Failed to load demographics (${res.status})`);
+  return res.json();
+}
 
 export async function getFilterOptions(): Promise<FilterOptions> {
   if (USE_MOCK) return delay(mockFilterOptions());

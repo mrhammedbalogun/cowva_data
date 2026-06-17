@@ -225,3 +225,85 @@ export function buildOverview(f: Filters): OverviewData {
     topFacilities: buildFacilities(f),
   };
 }
+
+export function buildVaccinations(f: Filters) {
+  const series = buildTimeSeries(f);
+  const total = scaledTotal(f);
+  const complete = Math.round(total * 0.31);
+  return {
+    timeSeries: series,
+    completionSeries: series.map((p, i) => ({
+      label: p.label,
+      value: Math.round(26 + (wobble(i) - 0.88) * 60),
+    })),
+    totals: { total: Math.round(total), complete, incomplete: Math.round(total) - complete },
+  };
+}
+
+export function buildVaccines(f: Filters) {
+  const total = scaledTotal(f);
+  const totalW = VACCINES.reduce((s, v) => s + v.weight, 0);
+  const byVaccine = VACCINES.map((v, i) => ({
+    vaccine: v.name,
+    category: v.category,
+    value: Math.round((total * v.weight) / totalW * wobble(i)),
+  })).sort((a, b) => b.value - a.value);
+  const routine = byVaccine
+    .filter((v) => v.category === "routine_immunisation")
+    .reduce((s, v) => s + v.value, 0);
+  const catchUp = byVaccine
+    .filter((v) => v.category === "catch_up")
+    .reduce((s, v) => s + v.value, 0);
+  return { byVaccine, byVaccineCategory: { routine, catchUp } };
+}
+
+export function buildFacilitiesList(f: Filters) {
+  const states = selectedStates(f);
+  const stateNames = new Set(states.map((s) => s.name));
+  const factor = genderFraction(f) * vaccineFraction(f) * dateFraction(f);
+  const stateTotalMap = new Map(states.map((s) => [s.name, s.total]));
+  const facilities = FACILITIES.filter((fac) => stateNames.has(fac.state))
+    .map((fac, i) => {
+      const base = (stateTotalMap.get(fac.state) ?? 0) * fac.share * factor;
+      return {
+        facility: fac.name,
+        state: fac.state,
+        branches: fac.branches,
+        vaccinations: Math.max(1, Math.round(base * wobble(i))),
+        completionRate: Math.min(99, Math.max(60, Math.round((72 + (wobble(i) - 0.88) * 100) * 10) / 10)),
+        lastActivity: `2026-06-${pad(1 + (i % 27))}`,
+      };
+    })
+    .sort((a, b) => b.vaccinations - a.vaccinations);
+  return { facilities };
+}
+
+const AGE_PROPS: [string, number][] = [
+  ["<1", 112],
+  ["1-4", 998],
+  ["5-14", 636],
+  ["15-49", 4128],
+  ["50+", 610],
+];
+
+export function buildDemographics(f: Filters) {
+  const total = scaledTotal(f);
+  const patients = total * PATIENT_RATIO;
+  const gf = genderFraction(f);
+  const base = patients / Math.max(gf, 0.0001);
+  const ageTotal = AGE_PROPS.reduce((s, [, n]) => s + n, 0);
+  return {
+    genderSplit: {
+      male: Math.round(base * (f.gender === "female" ? 0 : GENDER_RATIO.male)),
+      female: Math.round(base * (f.gender === "male" ? 0 : GENDER_RATIO.female)),
+    },
+    ageBands: AGE_PROPS.map(([band, n]) => ({
+      band,
+      value: Math.round((n / ageTotal) * patients),
+    })),
+    pregnancy: {
+      pregnant: Math.max(1, Math.round(patients * 0.0005)),
+      nonPregnant: Math.round(patients * 0.07),
+    },
+  };
+}
