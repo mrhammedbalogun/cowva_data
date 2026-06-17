@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Syringe, Loader2, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,12 +45,17 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Syringe className="size-6" />
-          </div>
-          <h1 className="text-xl font-semibold tracking-tight">Cowva Impact</h1>
+          <Image
+            src="/cowva-logo.png"
+            alt="Cowva"
+            width={2715}
+            height={873}
+            priority
+            unoptimized
+            className="mb-3 h-12 w-auto"
+          />
           <p className="text-sm text-muted-foreground">
-            Vaccination impact dashboard
+            Impact dashboard
           </p>
         </div>
 
